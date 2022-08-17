@@ -1,53 +1,35 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Put,
-  UsePipes,
-  UseGuards,
-} from '@nestjs/common';
-import { HotelsService } from 'src/modules/hotels/hotels.service';
-import { CreateHotelDto } from 'src/modules/hotels/dto/create-hotel.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
-import { IdValidationPipe } from 'src/common/pipes/id-validation.pipe';
-import { JoiValidationPipe } from 'src/common/pipes/joi-validation.pipe';
-import { createHotelSchema } from './/joi/createBook.schema';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Controller, Get, Post, Body, Param, Put, Query } from '@nestjs/common';
+import { HotelsService } from './hotels.service';
+import { CreateHotelDto, HotelParams } from './interfaces/hotel.interface';
+import { IdValidationPipe } from '../../common/pipes/id-validation.pipe';
 
-@Controller('hotels')
+@Controller()
 export class HotelsController {
-  constructor(private readonly booksService: HotelsService) {}
+  constructor(private readonly hotelsService: HotelsService) {}
 
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.booksService.findAll();
+  @Get('admin/hotels')
+  search(
+    @Query('limit') limit: HotelParams['limit'],
+    @Query('offset') offset: HotelParams['offset'],
+  ) {
+    return this.hotelsService.search({ limit, offset });
   }
 
-  @Post()
-  @UsePipes(new JoiValidationPipe(createHotelSchema))
-  create(@Body() createBookDto: CreateHotelDto) {
-    return this.booksService.create(createBookDto);
+  @Get('common/hotels/:id')
+  findById(@Param('id', new IdValidationPipe()) id: string) {
+    return this.hotelsService.findById(id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.booksService.findOne(id);
+  @Post('admin/hotels')
+  create(@Body() createHotelDto: Partial<CreateHotelDto>) {
+    return this.hotelsService.create(createHotelDto);
   }
 
-  @Put(':id')
+  @Put('admin/hotels/:id')
   update(
     @Param('id', new IdValidationPipe()) id: string,
-    @Body() updateBookDto: UpdateBookDto,
+    @Body() createHotelRoomDto: Pick<CreateHotelDto, 'title' | 'description'>,
   ) {
-    return this.booksService.update(id, updateBookDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.booksService.delete(id);
+    return this.hotelsService.update(id, createHotelRoomDto);
   }
 }

@@ -1,41 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateHotelDto } from 'src/modules/hotels/dto/create-hotel.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
 import { Model } from 'mongoose';
-import { Hotel, BookDocument } from 'src/modules/hotels/schemas/hotel.schema';
+import { Hotel, HotelDocument } from './schemas/hotel.schema';
+import type {
+  CreateHotelDto,
+  HotelParams,
+  IHotel,
+  IHotelService,
+} from './interfaces/hotel.interface';
 
 @Injectable()
-export class HotelsService {
+export class HotelsService implements IHotelService {
   constructor(
-    @InjectModel(Hotel.name) private readonly bookModel: Model<BookDocument>,
+    @InjectModel(Hotel.name) private readonly hotelModel: Model<HotelDocument>,
   ) {}
 
-  async create(createBookDto: CreateHotelDto): Promise<Hotel> {
-    const createdBook = await this.bookModel.create(createBookDto);
-
-    return createdBook;
-  }
-
-  async findAll(): Promise<Hotel[]> {
-    return this.bookModel.find().exec();
-  }
-
-  async findOne(id: string): Promise<Hotel> {
-    return this.bookModel.findOne({ _id: id }).exec();
-  }
-
-  async update(id: string, updateBookDto: UpdateBookDto): Promise<Hotel> {
-    return this.bookModel.findOneAndUpdate({ _id: id }, updateBookDto, {
-      lean: true,
-      returnDocument: 'after',
+  create(data: Partial<CreateHotelDto>): Promise<IHotel> {
+    return this.hotelModel.create({
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
   }
 
-  async delete(id: string) {
-    const deletedBook = await this.bookModel
-      .findByIdAndRemove({ _id: id })
+  findById(id: ID): Promise<IHotel> {
+    return this.hotelModel.findById(id).exec();
+  }
+
+  search(params: HotelParams): Promise<IHotel[]> {
+    return this.hotelModel
+      .find({}, {}, { limit: params.limit, skip: params.offset })
       .exec();
-    return deletedBook;
+  }
+
+  update(id: ID, data: Partial<CreateHotelDto>): Promise<IHotel> {
+    return this.hotelModel
+      .findByIdAndUpdate(
+        id,
+        {
+          ...data,
+          updatedAt: new Date(),
+        },
+        {
+          new: true,
+        },
+      )
+      .exec();
   }
 }

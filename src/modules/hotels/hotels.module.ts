@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { HotelsService } from 'src/modules/hotels/hotels.service';
-import { HotelsController } from 'src/modules/hotels/hotels.controller';
-import { Hotel, HotelSchema } from 'src/modules/hotels/schemas/hotel.schema';
+import { Hotel, HotelSchema } from './schemas/hotel.schema';
+import { HotelsController } from './hotels.controller';
+import { HotelsService } from './hotels.service';
 
 @Module({
   imports: [
