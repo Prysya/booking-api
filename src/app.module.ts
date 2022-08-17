@@ -4,10 +4,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HotelsModule } from 'src/modules/hotels/hotels.module';
 import { AuthModule } from './authentication/auth.module';
 import { UsersModule } from './modules/users/users.module';
-import { BookingModule } from './modules/booking/booking.module';
-import { SupportModule } from './modules/support/support.module';
 import { ReservationModule } from './modules/reservation/reservation.module';
 import { SupportRequestModule } from './modules/support-request/support-request.module';
+import { HotelRoomModule } from './modules/hotel-room/hotel-room.module';
 
 @Module({
   imports: [
@@ -26,10 +25,9 @@ import { SupportRequestModule } from './modules/support-request/support-request.
     HotelsModule,
     AuthModule,
     UsersModule,
-    BookingModule,
-    SupportModule,
     ReservationModule,
     SupportRequestModule,
+    HotelRoomModule,
   ],
 })
 export class AppModule {}
