@@ -1,45 +1,51 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { ReservationService } from 'src/modules/reservation/reservation.service';
-import { CreateReservationDto } from 'src/modules/reservation/dto/create-reservation.dto';
-import { UpdateReservationDto } from 'src/modules/reservation/dto/update-reservation.dto';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { ReservationService } from './reservation.service';
+import { ReservationBody } from './interfaces/reservation.interface';
+import { IdValidationPipe } from '../../common/pipes/id-validation.pipe';
 
 @Controller('reservation')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
-  @Post()
-  create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationService.create(createReservationDto);
+  @Post('client/reservations')
+  addReservation(@Body() reservationBody: ReservationBody) {
+    return this.reservationService.addReservation({
+      dateEnd: reservationBody.endDate,
+      dateStart: reservationBody.startDate,
+      hotelId: '',
+      roomId: reservationBody.hotelRoom,
+      userId: '',
+    });
   }
 
-  @Get()
-  findAll() {
-    return this.reservationService.findAll();
+  @Get('client/reservations')
+  getReservations() {
+    return this.reservationService.getReservations({
+      dateEnd: new Date(),
+      dateStart: new Date(),
+      user: '',
+    });
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservationService.findOne(+id);
+  @Delete('client/reservations/:id')
+  deleteByClient(@Param('id', new IdValidationPipe()) id: ID) {
+    return this.reservationService.removeReservation(id, '');
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateReservationDto: UpdateReservationDto,
+  @Get('manager/reservations/:userId')
+  getUserReservations(@Param('userId', new IdValidationPipe()) userId: ID) {
+    return this.reservationService.getReservations({
+      dateEnd: new Date(),
+      dateStart: new Date(),
+      user: userId,
+    });
+  }
+
+  @Delete('manager/reservations/:userId/:reservationId')
+  deleteUserReservation(
+    @Param('userId', new IdValidationPipe()) userId: ID,
+    @Param('reservationId', new IdValidationPipe()) reservationId: ID,
   ) {
-    return this.reservationService.update(+id, updateReservationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reservationService.remove(+id);
+    return this.reservationService.removeReservation(reservationId, userId);
   }
 }

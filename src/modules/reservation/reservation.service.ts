@@ -1,26 +1,36 @@
+import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
-import { CreateReservationDto } from 'src/modules/reservation/dto/create-reservation.dto';
-import { UpdateReservationDto } from 'src/modules/reservation/dto/update-reservation.dto';
+import {
+  CreateReservationDto,
+  IReservation,
+  ReservationMethods,
+  ReservationSearchOptions,
+} from './interfaces/reservation.interface';
+import { Reservation, ReservationDocument } from './schemas/reservation.schema';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
-export class ReservationService {
-  create(createReservationDto: CreateReservationDto) {
-    return 'This action adds a new reservation';
+export class ReservationService implements ReservationMethods {
+  constructor(
+    @InjectModel(Reservation.name)
+    private readonly reservationModel: Model<ReservationDocument>,
+  ) {}
+
+  addReservation(data: CreateReservationDto): Promise<IReservation> {
+    return this.reservationModel.create(data);
   }
 
-  findAll() {
-    return `This action returns all reservation`;
+  getReservations(
+    filter: ReservationSearchOptions,
+  ): Promise<Array<IReservation>> {
+    return this.reservationModel.find(filter).exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} reservation`;
-  }
-
-  update(id: number, updateReservationDto: UpdateReservationDto) {
-    return `This action updates a #${id} reservation`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} reservation`;
+  async removeReservation(id: ID, userId: ID): Promise<void> {
+    try {
+      await this.reservationModel.deleteOne({ _id: id, userId });
+    } catch (err) {
+      throw err;
+    }
   }
 }
