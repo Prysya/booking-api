@@ -9,6 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { HotelRoom } from './schemas/hotel-room.schema';
 import type { HotelRoomDocument } from './schemas/hotel-room.schema';
+import { IHotel } from '../hotels/interfaces/hotel.interface';
 
 @Injectable()
 export class HotelRoomService implements IHotelRoomService {
@@ -17,12 +18,20 @@ export class HotelRoomService implements IHotelRoomService {
     private readonly hotelRoomModel: Model<HotelRoomDocument>,
   ) {}
 
-  create(data: Partial<CreateHotelRoomDto>): Promise<IHotelRoom> {
-    return this.hotelRoomModel.create({
+  async create(
+    data: Partial<CreateHotelRoomDto>,
+  ): Promise<IHotelRoom & { hotel: IHotel }> {
+    const hotelRoom = await this.hotelRoomModel.create({
       ...data,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+
+    return this.hotelRoomModel
+      .find({ _id: hotelRoom._id })
+      .select('-__v')
+      .populate('hotel', '-__v')
+      .exec();
   }
 
   findById(id: ID, isEnabled?: boolean): Promise<IHotelRoom> {

@@ -1,16 +1,16 @@
 export interface CreateUserDto {
   readonly email: string;
-  readonly passwordHash: string;
+  readonly password: string;
   readonly name: string;
   readonly contactPhone?: string;
   readonly role: 'client' | 'admin' | 'manager';
 }
 
-export interface User extends CreateUserDto {
+export interface IUser extends CreateUserDto {
   _id: string;
 }
 
-interface SearchUserParams {
+export interface SearchUserParams {
   limit: number;
   offset: number;
   email: string;
@@ -18,9 +18,9 @@ interface SearchUserParams {
   contactPhone: string;
 }
 
-interface IUserService {
-  create(data: Partial<User>): Promise<User>;
-  findById(id: ID): Promise<User>;
-  findByEmail(email: string): Promise<User>;
-  findAll(params: SearchUserParams): Promise<User[]>;
+export interface IUserService {
+  create(createUserDto: CreateUserDto): Promise<IUser>;
+  findById(id: ID): Promise<IUser>;
+  findByEmail(email: string): Promise<IUser>;
+  findAll(params: SearchUserParams): Promise<IUser[]>;
 }

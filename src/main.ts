@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { RedisIoAdapter } from './common/adapters/redisIo.adapter';
 import { RequestInterceptor } from './common/interceptors/request.interceptor';
 import { HttpExceptionFilter } from './common/exceptions/httpException.filter';
 
@@ -12,7 +13,11 @@ import { HttpExceptionFilter } from './common/exceptions/httpException.filter';
   app.useGlobalFilters(new HttpExceptionFilter());
   app.setGlobalPrefix('api');
 
-  const PORT = configService.get<number>('PORT') ?? 3000;
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis();
+  app.useWebSocketAdapter(redisIoAdapter);
+
+  const PORT = configService.get<number>('PORT') ?? 3002;
 
   await app.listen(PORT);
   console.log(`Приложение запущено на: ${await app.getUrl()}`);

@@ -24,7 +24,10 @@ export class HotelsService implements IHotelService {
   }
 
   findById(id: ID): Promise<IHotel> {
-    return this.hotelModel.findById(id).exec();
+    return this.hotelModel
+      .findOne({ _id: id })
+      .select('_id title description')
+      .exec();
   }
 
   search(params: HotelParams): Promise<IHotel[]> {

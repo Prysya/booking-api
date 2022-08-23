@@ -16,9 +16,9 @@ import { HotelRoomModule } from './modules/hotel-room/hotel-room.module';
       useFactory: async (configService: ConfigService) => ({
         uri:
           configService.get<string>('DB_HOST') ?? 'mongodb://localhost:27017',
-        user: configService.get<string>('DB_USERNAME') ?? 'root',
-        pass: configService.get<string>('DB_PASSWORD') ?? 'password',
-        dbName: configService.get<string>('DB_NAME') ?? 'library_database',
+        // user: configService.get<string>('DB_USERNAME') ?? 'root',
+        // pass: configService.get<string>('DB_PASSWORD') ?? 'password',
+        dbName: configService.get<string>('DB_NAME') ?? 'booking_database',
       }),
       inject: [ConfigService],
     }),

@@ -31,21 +31,21 @@ export class HotelRoomController {
     return this.hotelRoomService.search({ limit, offset, title: '' });
   }
 
-  @Get('common/hotel-rooms/:id')
-  findById(@Param('id', new IdValidationPipe()) id: string) {
-    return this.hotelRoomService.findById(id);
-  }
-
   @Post('admin/hotel-rooms')
   @UseInterceptors(FilesInterceptor('files'))
   create(
-    @UploadedFiles() images: Array<Express.Multer.File>,
     @Body() createHotelRoomDto: Partial<CreateHotelRoomDto>,
+    @UploadedFiles() images?: Array<Express.Multer.File>,
   ) {
     return this.hotelRoomService.create({
       ...createHotelRoomDto,
-      images: images.map((image) => image.path),
+      images: images ? images.map((image) => image.path) : [],
     });
+  }
+
+  @Get('common/hotel-rooms/:id')
+  findById(@Param('id', new IdValidationPipe()) id: string) {
+    return this.hotelRoomService.findById(id);
   }
 
   @Put('admin/hotel-rooms/:id')
