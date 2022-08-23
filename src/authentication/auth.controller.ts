@@ -14,14 +14,14 @@ export class AuthController {
     @Request() req: any,
     @Body() body: Body & { email: string; password: string },
   ) {
-    const user = await this.userService.findUser(body.email, body.password);
+    const user = await this.userService.findByEmail(body.email);
 
     return this.authService.sendToken(user);
   }
 
   @Post('signup')
   async signup(@Body() body: CreateUserDto) {
-    const user = await this.userService.createUser(body);
+    const user = await this.userService.create(body);
 
     return this.authService.sendToken(user);
   }
