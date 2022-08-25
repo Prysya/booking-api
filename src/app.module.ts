@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { HotelsModule } from 'src/modules/hotels/hotels.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { HotelsModule } from './modules/hotels/hotels.module';
 import { AuthModule } from './authentication/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ReservationModule } from './modules/reservation/reservation.module';
@@ -21,6 +23,10 @@ import { HotelRoomModule } from './modules/hotel-room/hotel-room.module';
         dbName: configService.get<string>('DB_NAME') ?? 'booking_database',
       }),
       inject: [ConfigService],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/public',
     }),
     HotelsModule,
     AuthModule,
