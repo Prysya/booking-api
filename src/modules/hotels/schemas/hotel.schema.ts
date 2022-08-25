@@ -3,7 +3,15 @@ import { Document } from 'mongoose';
 
 export type HotelDocument = Hotel & Document;
 
-@Schema()
+@Schema({
+  toJSON: {
+    transform: (doc, ret) => {
+      delete ret.__v;
+      ret.id = ret._id;
+      delete ret._id;
+    },
+  },
+})
 export class Hotel {
   @Prop({ required: true })
   title: string;

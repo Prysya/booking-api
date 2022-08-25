@@ -12,44 +12,24 @@ export class HotelsController {
     @Query('limit') limit: HotelParams['limit'],
     @Query('offset') offset: HotelParams['offset'],
   ) {
-    const hotels = await this.hotelsService.search({ limit, offset });
-    return hotels.map(({ title, description, _id }) => ({
-      id: _id,
-      title,
-      description,
-    }));
+    return this.hotelsService.search({ limit, offset });
   }
 
   @Get('common/hotels/:id')
-  async findById(@Param('id', new IdValidationPipe()) id: string) {
-    const hotel = await this.hotelsService.findById(id);
-    return {
-      id: hotel._id,
-      title: hotel.title,
-      description: hotel.description,
-    };
+  findById(@Param('id', new IdValidationPipe()) id: string) {
+    return this.hotelsService.findById(id);
   }
 
   @Post('admin/hotels')
-  async create(@Body() createHotelDto: Partial<CreateHotelDto>) {
-    const hotel = await this.hotelsService.create(createHotelDto);
-    return {
-      id: hotel._id,
-      title: hotel.title,
-      description: hotel.description,
-    };
+  create(@Body() createHotelDto: Partial<CreateHotelDto>) {
+    return this.hotelsService.create(createHotelDto);
   }
 
   @Put('admin/hotels/:id')
-  async update(
+  update(
     @Param('id', new IdValidationPipe()) id: string,
     @Body() createHotelRoomDto: Pick<CreateHotelDto, 'title' | 'description'>,
   ) {
-    const hotel = await this.hotelsService.update(id, createHotelRoomDto);
-    return {
-      id: hotel._id,
-      title: hotel.title,
-      description: hotel.description,
-    };
+    return this.hotelsService.update(id, createHotelRoomDto);
   }
 }
