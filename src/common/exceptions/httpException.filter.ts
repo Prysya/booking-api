@@ -14,7 +14,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const data = exception.getResponse();
 
-    response.json({
+    response.status(status ?? 500).json({
       timestamp: new Date().toISOString(),
       status: 'fail',
       data,
