@@ -1,5 +1,8 @@
+import { IHotel } from 'src/modules/hotels/interfaces/hotel.interface';
+
 export interface CreateHotelRoomDto {
-  readonly hotel: ID;
+  readonly hotel: ID | IHotel;
+  readonly title: string;
   readonly description?: string;
   readonly images?: string[];
   readonly createdAt: Date;

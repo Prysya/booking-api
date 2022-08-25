@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { find } from 'rxjs';
 import type {
   CreateHotelRoomDto,
   IHotelRoom,
@@ -9,7 +10,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { HotelRoom } from './schemas/hotel-room.schema';
 import type { HotelRoomDocument } from './schemas/hotel-room.schema';
-import { IHotel } from '../hotels/interfaces/hotel.interface';
+
+const POPULATE_HOTEL_SELECT = 'title description -_id';
 
 @Injectable()
 export class HotelRoomService implements IHotelRoomService {
@@ -18,9 +20,7 @@ export class HotelRoomService implements IHotelRoomService {
     private readonly hotelRoomModel: Model<HotelRoomDocument>,
   ) {}
 
-  async create(
-    data: Partial<CreateHotelRoomDto>,
-  ): Promise<IHotelRoom & { hotel: IHotel }> {
+  async create(data: Partial<CreateHotelRoomDto>): Promise<IHotelRoom> {
     const hotelRoom = await this.hotelRoomModel.create({
       ...data,
       createdAt: new Date(),
@@ -28,40 +28,52 @@ export class HotelRoomService implements IHotelRoomService {
     });
 
     return this.hotelRoomModel
-      .find({ _id: hotelRoom._id })
-      .select('-__v')
-      .populate('hotel', '-__v')
+      .findOne({ _id: hotelRoom._id })
+      .select('title description images hotel')
+      .populate('hotel', POPULATE_HOTEL_SELECT)
       .exec();
   }
 
   findById(id: ID, isEnabled?: boolean): Promise<IHotelRoom> {
-    return this.hotelRoomModel.findById(id).exec();
+    return this.hotelRoomModel
+      .findById(id)
+      .select('title description images hotel')
+      .populate('hotel', POPULATE_HOTEL_SELECT)
+      .exec();
   }
 
   search(params: SearchRoomsParams): Promise<IHotelRoom[]> {
     return this.hotelRoomModel
       .find(
-        { title: params.title },
+        { ...(Boolean(params.title) && { hotel: params.title }) },
         {},
         { limit: params.limit, skip: params.offset },
       )
+      .select('title images hotel')
+      .populate('hotel', POPULATE_HOTEL_SELECT)
       .exec();
   }
 
   update(id: ID, data: Partial<IHotelRoom>): Promise<IHotelRoom> {
+    const dataWithoutImages = JSON.parse(JSON.stringify(data));
+    delete dataWithoutImages.images;
+
     return this.hotelRoomModel
-      .findByIdAndUpdate(
-        id,
+      .findOneAndUpdate(
+        { _id: id },
         {
-          $push: { images: data.images },
-          ...data,
-          updatedAt: new Date(),
+          $addToSet: { images: { $each: data.images } },
+          $set: {
+            ...dataWithoutImages,
+            updatedAt: new Date(),
+          },
         },
         {
           new: true,
         },
       )
-      .populate('Hotel')
+      .select('title description images hotel')
+      .populate('hotel', POPULATE_HOTEL_SELECT)
       .exec();
   }
 }
