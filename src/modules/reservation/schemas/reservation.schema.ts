@@ -3,7 +3,15 @@ import { Document, ObjectId, Schema as MongooseSchema } from 'mongoose';
 
 export type ReservationDocument = Reservation & Document;
 
-@Schema()
+@Schema({
+  toJSON: {
+    transform: (doc, ret) => {
+      delete ret.__v;
+      ret.id = ret._id;
+      delete ret._id;
+    },
+  },
+})
 export class Reservation {
   @Prop({ required: true, ref: 'User', type: MongooseSchema.Types.ObjectId })
   userId: ObjectId;
