@@ -1,7 +1,18 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Response } from 'express';
+import JwtAuthGuard from '../common/guards/jwt-auth.guard';
+import { LocalAuthenticationGuard } from '../common/guards/local-auth.guard';
 import { UsersService } from '../modules/users/users.service';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../modules/users/interfaces/users.interface';
+import { RequestWithUser } from './interfaces/request-with-user.intarface';
 
 @Controller('auth')
 export class AuthController {
@@ -9,20 +20,35 @@ export class AuthController {
     private readonly userService: UsersService,
     private readonly authService: AuthService,
   ) {}
-  @Post('signin')
-  async signin(
-    @Request() req: any,
-    @Body() body: Body & { email: string; password: string },
-  ) {
-    const user = await this.userService.findByEmail(body.email);
 
-    return this.authService.sendToken(user);
+  @HttpCode(200)
+  @UseGuards(LocalAuthenticationGuard)
+  @Post('login')
+  async logIn(@Req() request: RequestWithUser, @Res() response: Response) {
+    const { user } = request;
+
+    const cookie = this.authService.getCookieWithJwtToken(user._id);
+
+    response.setHeader('Set-Cookie', cookie);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...currentUser } = user;
+
+    return response.send(currentUser);
   }
 
-  @Post('signup')
-  async signup(@Body() body: CreateUserDto) {
-    const user = await this.userService.create(body);
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logOut(@Req() request: RequestWithUser, @Res() response: Response) {
+    response.setHeader('Set-Cookie', this.authService.getCookieForLogOut());
+    return response.sendStatus(200);
+  }
 
-    return this.authService.sendToken(user);
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  authenticate(@Req() request: RequestWithUser) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...user } = request.user;
+    return user;
   }
 }

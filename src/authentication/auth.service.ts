@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 import { CreateUserDto } from '../modules/users/interfaces/users.interface';
-import { TokenPayload } from './interfaces/token-payload.interface';
 import { UsersService } from '../modules/users/users.service';
+import { JwtTokenPayload } from './interfaces/jwt-token-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -14,41 +15,41 @@ export class AuthService {
     readonly configService: ConfigService,
   ) {}
 
-  async validateUser(id): Promise<Omit<CreateUserDto, 'password'> | null> {
-    const user = await this.usersService.findById(id);
-
-    if (user) {
-      const { password, ...result } = user;
-      return result;
+  private async verifyPassword(
+    plainTextPassword: string,
+    hashedPassword: string,
+  ) {
+    const isPasswordMatching = await bcrypt.compare(
+      plainTextPassword,
+      hashedPassword,
+    );
+    if (!isPasswordMatching) {
+      throw new BadRequestException('Неверный email или пароль');
     }
+  }
 
-    return null;
+  public getCookieWithJwtToken(userId: string) {
+    const payload: JwtTokenPayload = { userId };
+    const token = this.jwtService.sign(payload);
+    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+      'JWT_EXPIRATION_TIME',
+    )}`;
   }
 
   async validateUserLocal(
     email: string,
+    userPassword: string,
   ): Promise<Omit<CreateUserDto, 'password'> | null> {
-    const user = await this.usersService.findByEmail(email);
+    const currentUser = await this.usersService.findByEmail(email);
+    await this.verifyPassword(userPassword, currentUser.password);
 
-    if (user) {
-      const { password, ...result } = user;
-      return result;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...user } = currentUser;
 
-    return null;
+    return user;
   }
 
-  sendToken(user: any) {
-    const payload: TokenPayload = {
-      id: user._id,
-      email: user.email,
-      firstName: user.firstName,
-    };
-
-    const secret = this.configService.get('JWT_SECRET');
-
-    return {
-      access_token: this.jwtService.sign(payload, { secret }),
-    };
+  public getCookieForLogOut() {
+    return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
   }
 }
