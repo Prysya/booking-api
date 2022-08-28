@@ -13,5 +13,6 @@ import { HotelRoom, HotelRoomSchema } from './schemas/hotel-room.schema';
   ],
   controllers: [HotelRoomController],
   providers: [HotelRoomService],
+  exports: [HotelRoomModule],
 })
 export class HotelRoomModule {}

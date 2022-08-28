@@ -11,7 +11,7 @@ import { Model } from 'mongoose';
 import { HotelRoom } from './schemas/hotel-room.schema';
 import type { HotelRoomDocument } from './schemas/hotel-room.schema';
 
-const POPULATE_HOTEL_SELECT = 'title description -_id';
+const POPULATE_HOTEL_SELECT = 'title description _id';
 
 @Injectable()
 export class HotelRoomService implements IHotelRoomService {
