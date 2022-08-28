@@ -20,18 +20,20 @@ export class UsersService implements IUserService {
   async create(createUserDto: CreateUserDto): Promise<IUser> {
     const user: CreateUserDto = {
       ...createUserDto,
-      role: 'client' as const,
       password: await bcrypt.hash(createUserDto.password, 10),
     };
 
     return this.userModel.create(user);
   }
+
   findById(id: ID): Promise<IUser> {
     return this.userModel.findOne({ id }).exec();
   }
+
   findByEmail(email: string): Promise<IUser> {
     return this.userModel.findOne({ email }).exec();
   }
+
   findAll(params: SearchUserParams): Promise<IUser[]> {
     return this.userModel
       .find({
@@ -41,23 +43,4 @@ export class UsersService implements IUserService {
       })
       .exec();
   }
-
-  // findUser(email: string, password: string) {
-  //   return this.userModel
-  //     .findOne({ email })
-  //     .select('+password')
-  //     .then((user) => {
-  //       if (!user) {
-  //         throw new UnauthorizedException();
-  //       }
-  //
-  //       return bcrypt.compare(password, user.passwordHash).then((matched) => {
-  //         if (!matched) {
-  //           throw new UnauthorizedException();
-  //         }
-  //
-  //         return user;
-  //       });
-  //     });
-  // }
 }
