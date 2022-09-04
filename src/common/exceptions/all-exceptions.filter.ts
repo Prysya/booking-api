@@ -27,7 +27,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      error: exception instanceof HttpException ? exception.message : exception,
+      message:
+        exception instanceof HttpException ? exception.message : exception,
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
