@@ -36,11 +36,15 @@ export class UsersService implements IUserService {
 
   findAll(params: SearchUserParams): Promise<IUser[]> {
     return this.userModel
-      .find({
-        email: { $regex: params.email, $options: 'i' },
-        name: { $regex: params.name, $options: 'i' },
-        contactPhone: { $regex: params.contactPhone, $options: 'i' },
-      })
+      .find(
+        {
+          email: { $regex: params.email, $options: 'i' },
+          name: { $regex: params.name, $options: 'i' },
+          contactPhone: { $regex: params.contactPhone, $options: 'i' },
+        },
+        '_id email name contactPhone',
+        { limit: params.limit, skip: params.offset },
+      )
       .exec();
   }
 }
