@@ -5,7 +5,15 @@ import { Roles } from '../enums/users.enum';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({
+  toJSON: {
+    transform: (doc, ret) => {
+      delete ret.__v;
+      ret.id = ret._id;
+      delete ret._id;
+    },
+  },
+})
 export class User {
   @Prop({
     required: true,
