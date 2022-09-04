@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   HttpCode,
   Post,
   Req,
@@ -31,10 +30,9 @@ export class AuthController {
 
     response.setHeader('Set-Cookie', cookie);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...currentUser } = user;
+    const { email, name, contactPhone } = user;
 
-    return response.send(currentUser);
+    return response.send({ email, name, contactPhone });
   }
 
   @UseGuards(JwtAuthGuard)
