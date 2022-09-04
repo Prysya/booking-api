@@ -27,11 +27,11 @@ export class UsersService implements IUserService {
   }
 
   findById(id: ID): Promise<IUser> {
-    return this.userModel.findOne({ id }).exec();
+    return this.userModel.findOne({ _id: id }).lean().exec();
   }
 
   findByEmail(email: string): Promise<IUser> {
-    return this.userModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email }).select('+password').lean().exec();
   }
 
   findAll(params: SearchUserParams): Promise<IUser[]> {
