@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { RedisIoAdapter } from './common/adapters/redisIo.adapter';
 import { AllExceptionsFilter } from './common/exceptions/all-exceptions.filter';
+import { UnauthorizedExceptionFilter } from './common/exceptions/unauthorized-exception.filter';
+import { ForbiddenExceptionFilter } from './common/exceptions/forbidden-exception.filter';
 
 (async () => {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +14,8 @@ import { AllExceptionsFilter } from './common/exceptions/all-exceptions.filter';
   const httpAdapterHost = app.get(HttpAdapterHost);
 
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
+  app.useGlobalFilters(new UnauthorizedExceptionFilter());
+  app.useGlobalFilters(new ForbiddenExceptionFilter());
   app.setGlobalPrefix('api');
   app.use(cookieParser());
 
