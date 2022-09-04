@@ -12,6 +12,8 @@ import { HotelRoomService } from '../hotel-room/hotel-room.service';
 import { ReservationService } from './reservation.service';
 import { ReservationBody } from './interfaces/reservation.interface';
 import { IdValidationPipe } from '../../common/pipes/id-validation.pipe';
+import { Auth } from '../../authentication/decorators/auth.decorator';
+import { Roles } from '../users/enums/users.enum';
 
 const USER_ID = '63088fe94374de6a254aece1';
 
@@ -22,6 +24,7 @@ export class ReservationController {
     private readonly hotelRoomService: HotelRoomService,
   ) {}
 
+  @Auth([Roles.Client])
   @Post('client/reservations')
   async addReservation(@Body() reservationBody: ReservationBody) {
     const { hotel } = await this.hotelRoomService.findById(
@@ -47,6 +50,7 @@ export class ReservationController {
     };
   }
 
+  @Auth([Roles.Client])
   @Get('client/reservations')
   async getReservations(
     @Query('dateStart') dateStart: string,
@@ -69,11 +73,13 @@ export class ReservationController {
     }));
   }
 
+  @Auth([Roles.Client])
   @Delete('client/reservations/:id')
   deleteByClient(@Param('id', new IdValidationPipe()) id: ID) {
     return this.reservationService.removeReservation(id, USER_ID);
   }
 
+  @Auth([Roles.Manager])
   @Get('manager/reservations/:userId')
   async getUserReservations(
     @Param('userId', new IdValidationPipe()) userId: ID,
@@ -97,6 +103,7 @@ export class ReservationController {
     }));
   }
 
+  @Auth([Roles.Manager])
   @Delete('manager/reservations/:userId/:reservationId')
   deleteUserReservation(
     @Param('userId', new IdValidationPipe()) userId: ID,

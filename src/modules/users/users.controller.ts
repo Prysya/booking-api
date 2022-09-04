@@ -8,12 +8,15 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto, SearchUserParams } from './interfaces/users.interface';
 import { UsersService } from './users.service';
+import { Auth } from '../../authentication/decorators/auth.decorator';
+import { Roles } from './enums/users.enum';
 
 @Controller('')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
   @Post('admin/users')
+  @Auth([Roles.Admin])
   async createUserWithRole(@Body() createUserDto: CreateUserDto) {
     try {
       return await this.userService.create(createUserDto);
@@ -26,6 +29,7 @@ export class UsersController {
   }
 
   @Get('admin/users/')
+  @Auth([Roles.Admin])
   async getAllUsers(
     @Query('limit') limit?: SearchUserParams['limit'],
     @Query('offset') offset?: SearchUserParams['offset'],
@@ -43,6 +47,7 @@ export class UsersController {
   }
 
   @Get('manager/users/')
+  @Auth([Roles.Manager])
   async getAllUsersManager(
     @Query('limit') limit?: SearchUserParams['limit'],
     @Query('offset') offset?: SearchUserParams['offset'],

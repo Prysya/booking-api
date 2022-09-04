@@ -7,6 +7,7 @@ import {
   Put,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { diskStorage } from 'multer';
@@ -18,6 +19,11 @@ import type {
 import { IdValidationPipe } from '../../common/pipes/id-validation.pipe';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { filterImageFiles, generateFileName } from './utils/hotel-room.utils';
+import { Roles } from '../users/enums/users.enum';
+import { Auth } from '../../authentication/decorators/auth.decorator';
+import { User } from '../users/decorators/user.decorator';
+import { CreateUserDto } from '../users/interfaces/users.interface';
+import JwtCheckGuard from '../../common/guards/jwt-check.guard';
 
 @Controller()
 export class HotelRoomController {
@@ -33,6 +39,7 @@ export class HotelRoomController {
     return this.hotelRoomService.search({ limit, offset, title: hotel });
   }
 
+  @Auth([Roles.Admin])
   @Post('admin/hotel-rooms')
   @UseInterceptors(
     FilesInterceptor('images', 10, {
@@ -56,10 +63,18 @@ export class HotelRoomController {
   }
 
   @Get('common/hotel-rooms/:id')
-  findById(@Param('id', new IdValidationPipe()) id: string) {
+  @UseGuards(JwtCheckGuard)
+  findById(
+    @Param('id', new IdValidationPipe()) id: string,
+    @User() user: CreateUserDto,
+  ) {
+    console.log('++++++++++++++++++');
+    console.log({ user });
+    console.log('++++++++++++++++++');
     return this.hotelRoomService.findById(id);
   }
 
+  @Auth([Roles.Admin])
   @Put('admin/hotel-rooms/:id')
   @UseInterceptors(
     FilesInterceptor('images', 10, {
@@ -75,14 +90,11 @@ export class HotelRoomController {
     @Body() createHotelRoomDto: Partial<CreateHotelRoomDto>,
     @UploadedFiles() images?: Array<Express.Multer.File>,
   ) {
-    const test = await this.hotelRoomService.update(id, {
+    return this.hotelRoomService.update(id, {
       ...createHotelRoomDto,
       images: images
         ? images.map((image) => '/public/hotel-rooms/' + image.filename)
         : [],
     });
-
-    console.log(test);
-    return test;
   }
 }
