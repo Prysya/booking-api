@@ -7,6 +7,7 @@ import {
 import { Strategy } from 'passport-local';
 import { AuthService } from 'src/authentication/auth.service';
 import { LoginValidation } from '../validation/auth.validation';
+import { authMessages } from '../utils/auth-messages.util';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -18,13 +19,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const { error } = LoginValidation.validate({ email, password });
 
     if (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(authMessages.credentialsError);
     }
 
     const user = await this.authService.validateUserLocal(email, password);
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(authMessages.userNotFound);
     }
 
     return user;
