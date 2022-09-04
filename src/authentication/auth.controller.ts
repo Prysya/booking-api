@@ -43,12 +43,4 @@ export class AuthController {
     response.setHeader('Set-Cookie', this.authService.getCookieForLogOut());
     return response.sendStatus(200);
   }
-
-  @UseGuards(JwtAuthGuard)
-  @Get()
-  authenticate(@Req() request: RequestWithUser) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...user } = request.user;
-    return user;
-  }
 }
