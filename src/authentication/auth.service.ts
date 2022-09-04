@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../modules/users/interfaces/users.interface';
 import { UsersService } from '../modules/users/users.service';
 import { JwtTokenPayload } from './interfaces/jwt-token-payload.interface';
+import { authMessages } from './utils/auth-messages.util';
 
 @Injectable()
 export class AuthService {
@@ -23,8 +24,9 @@ export class AuthService {
       plainTextPassword,
       hashedPassword,
     );
+
     if (!isPasswordMatching) {
-      throw new BadRequestException('Неверный email или пароль');
+      throw new Error();
     }
   }
 
@@ -40,13 +42,17 @@ export class AuthService {
     email: string,
     userPassword: string,
   ): Promise<Omit<CreateUserDto, 'password'> | null> {
-    const currentUser = await this.usersService.findByEmail(email);
-    await this.verifyPassword(userPassword, currentUser.password);
+    try {
+      const currentUser = await this.usersService.findByEmail(email);
+      await this.verifyPassword(userPassword, currentUser.password);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...user } = currentUser;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...user } = currentUser;
 
-    return user;
+      return user;
+    } catch {
+      throw new UnauthorizedException(authMessages.userNotFound);
+    }
   }
 
   public getCookieForLogOut() {
