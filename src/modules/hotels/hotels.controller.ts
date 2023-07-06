@@ -6,7 +6,6 @@ import {
   Post,
   Put,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { HotelsService } from './hotels.service';
@@ -14,7 +13,6 @@ import { CreateHotelDto, HotelParams } from './interfaces/hotel.interface';
 import { IdValidationPipe } from '../../common/pipes/id-validation.pipe';
 import { Roles } from '../users/enums/users.enum';
 import { Auth } from '../../authentication/decorators/auth.decorator';
-import { RequestWithUser } from '../../authentication/interfaces/request-with-user.intarface';
 import JwtCheckGuard from '../../common/guards/jwt-check.guard';
 
 @Controller()
@@ -32,11 +30,7 @@ export class HotelsController {
 
   @UseGuards(JwtCheckGuard)
   @Get('common/hotels/:id')
-  findById(
-    @Param('id', new IdValidationPipe()) id: string,
-    @Req() request: RequestWithUser,
-  ) {
-    console.log(request.user);
+  findById(@Param('id', new IdValidationPipe()) id: string) {
     return this.hotelsService.findById(id);
   }
 

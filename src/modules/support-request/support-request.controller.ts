@@ -16,42 +16,29 @@ import { IdValidationPipe } from '../../common/pipes/id-validation.pipe';
 import { Auth } from '../../authentication/decorators/auth.decorator';
 import { Roles } from '../users/enums/users.enum';
 import { RequestWithUser } from '../../authentication/interfaces/request-with-user.intarface';
+import { CreateSupportRequest } from './interfaces/support-request.interface';
+import {SupportRequestService} from "./services/support-request.service";
 
 @Controller('')
-export class ReservationController {
-  constructor(
-    private readonly reservationService: ReservationService,
-    private readonly hotelRoomService: HotelRoomService,
-  ) {}
+export class SupportRequestController {
+  constructor(private readonly supportRequestService: SupportRequestService) {}
 
   @Auth([Roles.Client])
-  @Post('client/reservations')
+  @Post('client/support-requests')
   async addReservation(
-    @Body() reservationBody: ReservationBody,
+    @Body() reservationBody: Pick<CreateSupportRequest, 'text'>,
     @Req() request: RequestWithUser,
   ) {
-    const { hotel } = await this.hotelRoomService.findById(
-      reservationBody.hotelRoom,
-    );
-
-    const reservation = await this.reservationService.addReservation({
-      dateStart: moment(reservationBody.dateStart, 'DD.MM.YYYY').toDate(),
-      dateEnd: moment(reservationBody.dateEnd, 'DD.MM.YYYY').toDate(),
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      hotelId: typeof hotel === 'string' ? hotel : hotel._id,
-      roomId: reservationBody.hotelRoom,
-      userId: request.user._id,
-    });
-
-    return {
-      startDate: moment(reservation.dateStart).format('DD.MM.YYYY'),
-      endDate: moment(reservation.dateEnd).format('DD.MM.YYYY'),
-      hotelRoom: reservation.roomId,
-      hotel: reservation.hotelId,
-      id: reservation._id,
-    };
+    return this.supportRequestService.sendMessage({
+      author: request.user._id,
+      createdAt: new Date(),
+      message
+    })
   }
+
+
+
+
 
   @Auth([Roles.Client])
   @Get('client/reservations')

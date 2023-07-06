@@ -11,6 +11,7 @@ import { UsersModule } from './modules/users/users.module';
 import { ReservationModule } from './modules/reservation/reservation.module';
 import { SupportRequestModule } from './modules/support-request/support-request.module';
 import { HotelRoomModule } from './modules/hotel-room/hotel-room.module';
+import { MessageModule } from './modules/message/message.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { HotelRoomModule } from './modules/hotel-room/hotel-room.module';
     ReservationModule,
     SupportRequestModule,
     HotelRoomModule,
+    MessageModule,
   ],
 })
 export class AppModule {}

@@ -1,7 +1,7 @@
 export interface CreateMessageDto {
   author: ID;
   sentAt: Date;
-  test: string;
+  text: string;
   readAt?: Date;
 }
 
@@ -12,7 +12,7 @@ export interface CreateSupportRequestDto {
   isActive?: boolean;
 }
 
-export interface SupportRequest extends CreateMessageDto {
+export interface ISupportRequest extends CreateSupportRequestDto {
   _id: ID;
 }
 
@@ -42,16 +42,16 @@ export interface GetChatListParams {
 }
 
 export interface ISupportRequestService {
-  findSupportRequests(params: GetChatListParams): Promise<SupportRequest[]>;
+  findSupportRequests(params: GetChatListParams): Promise<ISupportRequest[]>;
   sendMessage(data: SendMessageDto): Promise<Message>;
   getMessages(supportRequest: ID): Promise<Message[]>;
   subscribe(
-    handler: (supportRequest: SupportRequest, message: Message) => void,
+    handler: (supportRequest: ISupportRequest, message: Message) => void,
   ): () => void;
 }
 
 export interface ISupportRequestClientService {
-  createSupportRequest(data: CreateSupportRequest): Promise<SupportRequest>;
+  createSupportRequest(data: CreateSupportRequest): Promise<ISupportRequest>;
   markMessagesAsRead(params: MarkMessagesAsReadDto);
   getUnreadCount(supportRequest: ID): Promise<Message[]>;
 }
